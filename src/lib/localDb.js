@@ -19,6 +19,7 @@ function getAppName() {
 // Get user data directory based on platform
 function getUserDataDir() {
   if (isCloud) return "/tmp"; // Fallback for Workers
+  if (process.env.VERCEL) return "/tmp"; // Vercel serverless
 
   if (process.env.DATA_DIR) return process.env.DATA_DIR;
 
@@ -41,9 +42,16 @@ function getUserDataDir() {
 const DATA_DIR = getUserDataDir();
 const DB_FILE = isCloud ? null : path.join(DATA_DIR, "db.json");
 
-// Ensure data directory exists
-if (!isCloud && !fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+// Ensure data directory exists (skip on Vercel)
+const isVercel = process.env.VERCEL === '1';
+const isSupabaseAvailable = isVercel || isCloud;
+
+if (!isSupabaseAvailable && !fs.existsSync(DATA_DIR)) {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch (e) {
+    console.warn("[DB] Cannot create data directory:", e.message);
+  }
 }
 
 // Default data structure

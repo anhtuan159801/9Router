@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin, isSupabaseConfigured } from "./supabase";
+import { getSupabase, getSupabaseAdmin, isSupabaseConfigured } from "./supabase";
 
 const DEFAULT_MITM_ROUTER_BASE = "http://localhost:20128";
 
@@ -69,7 +69,7 @@ export async function getSettings() {
     return cloneDefaultData().settings;
   }
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from("settings")
     .select("*")
     .eq("id", "default")
@@ -87,7 +87,7 @@ export async function updateSettings(updates) {
     return cloneDefaultData().settings;
   }
 
-  const db = await supabaseAdmin
+  const db = await getSupabaseAdmin()
     .from("settings")
     .update({
       cloud_enabled: updates.cloudEnabled,
@@ -125,7 +125,7 @@ export async function updateSettings(updates) {
 export async function getProviderConnections(filter = {}) {
   if (!isSupabaseConfigured()) return [];
 
-  let query = supabaseAdmin.from("provider_connections").select("*");
+  let query = getSupabaseAdmin().from("provider_connections").select("*");
 
   if (filter.provider) query = query.eq("provider", filter.provider);
   if (filter.isActive !== undefined) query = query.eq("is_active", filter.isActive);
@@ -139,7 +139,7 @@ export async function getProviderConnections(filter = {}) {
 export async function getProviderNodes(filter = {}) {
   if (!isSupabaseConfigured()) return [];
 
-  let query = supabaseAdmin.from("provider_nodes").select("*");
+  let query = getSupabaseAdmin().from("provider_nodes").select("*");
   if (filter.type) query = query.eq("type", filter.type);
 
   const { data, error } = await query;
@@ -150,7 +150,7 @@ export async function getProviderNodes(filter = {}) {
 export async function getProviderNodeById(id) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data } = await supabaseAdmin
+  const { data } = await getSupabaseAdmin()
     .from("provider_nodes")
     .select("*")
     .eq("id", id)
@@ -173,7 +173,7 @@ export async function createProviderNode(data) {
     updated_at: new Date().toISOString(),
   };
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("provider_nodes")
     .insert(node)
     .select()
@@ -186,7 +186,7 @@ export async function createProviderNode(data) {
 export async function updateProviderNode(id, data) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("provider_nodes")
     .update({
       type: data.type,
@@ -207,7 +207,7 @@ export async function updateProviderNode(id, data) {
 export async function deleteProviderNode(id) {
   if (!isSupabaseConfigured()) return false;
 
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from("provider_nodes")
     .delete()
     .eq("id", id);
@@ -218,7 +218,7 @@ export async function deleteProviderNode(id) {
 export async function getProxyPools(filter = {}) {
   if (!isSupabaseConfigured()) return [];
 
-  let query = supabaseAdmin.from("proxy_pools").select("*");
+  let query = getSupabaseAdmin().from("proxy_pools").select("*");
   if (filter.isActive !== undefined) query = query.eq("is_active", filter.isActive);
   if (filter.testStatus) query = query.eq("test_status", filter.testStatus);
 
@@ -231,7 +231,7 @@ export async function getProxyPools(filter = {}) {
 export async function getProxyPoolById(id) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data } = await supabaseAdmin
+  const { data } = await getSupabaseAdmin()
     .from("proxy_pools")
     .select("*")
     .eq("id", id)
@@ -259,7 +259,7 @@ export async function createProxyPool(data) {
     updated_at: now,
   };
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("proxy_pools")
     .insert(pool)
     .select()
@@ -272,7 +272,7 @@ export async function createProxyPool(data) {
 export async function updateProxyPool(id, data) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("proxy_pools")
     .update({
       name: data.name,
@@ -297,7 +297,7 @@ export async function updateProxyPool(id, data) {
 export async function deleteProxyPool(id) {
   if (!isSupabaseConfigured()) return false;
 
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from("proxy_pools")
     .delete()
     .eq("id", id);
@@ -308,7 +308,7 @@ export async function deleteProxyPool(id) {
 export async function deleteProviderConnectionsByProvider(providerId) {
   if (!isSupabaseConfigured()) return 0;
 
-  const { data } = await supabaseAdmin
+  const { data } = await getSupabaseAdmin()
     .from("provider_connections")
     .select("id")
     .eq("provider", providerId);
@@ -316,7 +316,7 @@ export async function deleteProviderConnectionsByProvider(providerId) {
   const count = data?.length || 0;
 
   if (count > 0) {
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from("provider_connections")
       .delete()
       .eq("provider", providerId);
@@ -328,7 +328,7 @@ export async function deleteProviderConnectionsByProvider(providerId) {
 export async function getProviderConnectionById(id) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data } = await supabaseAdmin
+  const { data } = await getSupabaseAdmin()
     .from("provider_connections")
     .select("*")
     .eq("id", id)
@@ -373,7 +373,7 @@ export async function createProviderConnection(data) {
     updated_at: now,
   };
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("provider_connections")
     .insert(connection)
     .select()
@@ -386,7 +386,7 @@ export async function createProviderConnection(data) {
 export async function updateProviderConnection(id, data) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("provider_connections")
     .update({
       provider: data.provider,
@@ -428,7 +428,7 @@ export async function updateProviderConnection(id, data) {
 export async function deleteProviderConnection(id) {
   if (!isSupabaseConfigured()) return false;
 
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from("provider_connections")
     .delete()
     .eq("id", id);
@@ -439,7 +439,7 @@ export async function deleteProviderConnection(id) {
 export async function reorderProviderConnections(providerId) {
   if (!isSupabaseConfigured()) return;
 
-  const { data } = await supabaseAdmin
+  const { data } = await getSupabaseAdmin()
     .from("provider_connections")
     .select("*")
     .eq("provider", providerId)
@@ -449,7 +449,7 @@ export async function reorderProviderConnections(providerId) {
   if (!data) return;
 
   for (let i = 0; i < data.length; i++) {
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from("provider_connections")
       .update({ priority: i + 1 })
       .eq("id", data[i].id);
@@ -459,7 +459,7 @@ export async function reorderProviderConnections(providerId) {
 export async function getModelAliases() {
   if (!isSupabaseConfigured()) return {};
 
-  const { data } = await supabaseAdmin.from("model_aliases").select("*");
+  const { data } = await getSupabaseAdmin().from("model_aliases").select("*");
   if (!data) return {};
 
   const aliases = {};
@@ -472,7 +472,7 @@ export async function getModelAliases() {
 export async function setModelAlias(alias, model) {
   if (!isSupabaseConfigured()) return;
 
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from("model_aliases")
     .upsert({ alias, model, updated_at: new Date().toISOString() }, { onConflict: "alias" });
 }
@@ -480,14 +480,14 @@ export async function setModelAlias(alias, model) {
 export async function deleteModelAlias(alias) {
   if (!isSupabaseConfigured()) return;
 
-  await supabaseAdmin.from("model_aliases").delete().eq("alias", alias);
+  await getSupabaseAdmin().from("model_aliases").delete().eq("alias", alias);
 }
 
 export async function getMitmAlias(toolName) {
   if (!isSupabaseConfigured()) return {};
 
   if (toolName) {
-    const { data } = await supabaseAdmin
+    const { data } = await getSupabaseAdmin()
       .from("mitm_alias")
       .select("mappings")
       .eq("tool_name", toolName)
@@ -495,7 +495,7 @@ export async function getMitmAlias(toolName) {
     return data?.mappings || {};
   }
 
-  const { data } = await supabaseAdmin.from("mitm_alias").select("*");
+  const { data } = await getSupabaseAdmin().from("mitm_alias").select("*");
   if (!data) return {};
 
   const aliases = {};
@@ -508,7 +508,7 @@ export async function getMitmAlias(toolName) {
 export async function setMitmAliasAll(toolName, mappings) {
   if (!isSupabaseConfigured()) return;
 
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from("mitm_alias")
     .upsert(
       { tool_name: toolName, mappings: mappings || {}, updated_at: new Date().toISOString() },
@@ -519,21 +519,21 @@ export async function setMitmAliasAll(toolName, mappings) {
 export async function getCombos() {
   if (!isSupabaseConfigured()) return [];
 
-  const { data } = await supabaseAdmin.from("combos").select("*").order("created_at", { ascending: false });
+  const { data } = await getSupabaseAdmin().from("combos").select("*").order("created_at", { ascending: false });
   return data || [];
 }
 
 export async function getComboById(id) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data } = await supabaseAdmin.from("combos").select("*").eq("id", id).single();
+  const { data } = await getSupabaseAdmin().from("combos").select("*").eq("id", id).single();
   return data || null;
 }
 
 export async function getComboByName(name) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data } = await supabaseAdmin.from("combos").select("*").eq("name", name).single();
+  const { data } = await getSupabaseAdmin().from("combos").select("*").eq("name", name).single();
   return data || null;
 }
 
@@ -549,7 +549,7 @@ export async function createCombo(data) {
     updated_at: now,
   };
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("combos")
     .insert(combo)
     .select()
@@ -562,7 +562,7 @@ export async function createCombo(data) {
 export async function updateCombo(id, data) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("combos")
     .update({
       name: data.name,
@@ -580,14 +580,14 @@ export async function updateCombo(id, data) {
 export async function deleteCombo(id) {
   if (!isSupabaseConfigured()) return false;
 
-  const { error } = await supabaseAdmin.from("combos").delete().eq("id", id);
+  const { error } = await getSupabaseAdmin().from("combos").delete().eq("id", id);
   return !error;
 }
 
 export async function getApiKeys() {
   if (!isSupabaseConfigured()) return [];
 
-  const { data } = await supabaseAdmin.from("api_keys").select("*");
+  const { data } = await getSupabaseAdmin().from("api_keys").select("*");
   return data || [];
 }
 
@@ -606,7 +606,7 @@ export async function createApiKey(name, machineId) {
     created_at: new Date().toISOString(),
   };
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from("api_keys")
     .insert(apiKey)
     .select()
@@ -619,21 +619,21 @@ export async function createApiKey(name, machineId) {
 export async function deleteApiKey(id) {
   if (!isSupabaseConfigured()) return false;
 
-  const { error } = await supabaseAdmin.from("api_keys").delete().eq("id", id);
+  const { error } = await getSupabaseAdmin().from("api_keys").delete().eq("id", id);
   return !error;
 }
 
 export async function getApiKeyById(id) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data } = await supabaseAdmin.from("api_keys").select("*").eq("id", id).single();
+  const { data } = await getSupabaseAdmin().from("api_keys").select("*").eq("id", id).single();
   return data || null;
 }
 
 export async function updateApiKey(id, data) {
   if (!isSupabaseConfigured()) return null;
 
-  const { data: result, error } = await supabaseAdmin
+  const { data: result, error } = await getSupabaseAdmin()
     .from("api_keys")
     .update({ name: data.name, is_active: data.isActive })
     .eq("id", id)
@@ -647,7 +647,7 @@ export async function updateApiKey(id, data) {
 export async function validateApiKey(key) {
   if (!isSupabaseConfigured()) return false;
 
-  const { data } = await supabaseAdmin.from("api_keys").select("is_active").eq("key", key).single();
+  const { data } = await getSupabaseAdmin().from("api_keys").select("is_active").eq("key", key).single();
   return data && data.is_active !== false;
 }
 
@@ -655,7 +655,7 @@ export async function getPricing() {
   if (!isSupabaseConfigured()) return {};
 
   const { PROVIDER_PRICING } = await import("@/shared/constants/pricing.js");
-  const { data } = await supabaseAdmin.from("pricing").select("*");
+  const { data } = await getSupabaseAdmin().from("pricing").select("*");
 
   const merged = { ...PROVIDER_PRICING };
 
@@ -674,7 +674,7 @@ export async function getPricing() {
 export async function getPricingForModel(provider, model) {
   if (!model || !isSupabaseConfigured()) return null;
 
-  const { data } = await supabaseAdmin
+  const { data } = await getSupabaseAdmin()
     .from("pricing")
     .select("pricing_data")
     .eq("provider", provider)
@@ -692,7 +692,7 @@ export async function updatePricing(pricingData) {
 
   for (const [provider, models] of Object.entries(pricingData)) {
     for (const [model, pricing] of Object.entries(models)) {
-      await supabaseAdmin
+      await getSupabaseAdmin()
         .from("pricing")
         .upsert(
           {
@@ -713,59 +713,59 @@ export async function resetPricing(provider, model) {
   if (!isSupabaseConfigured()) return;
 
   if (model) {
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from("pricing")
       .delete()
       .eq("provider", provider)
       .eq("model", model);
   } else {
-    await supabaseAdmin.from("pricing").delete().eq("provider", provider);
+    await getSupabaseAdmin().from("pricing").delete().eq("provider", provider);
   }
 }
 
 export async function resetAllPricing() {
   if (!isSupabaseConfigured()) return;
 
-  await supabaseAdmin.from("pricing").delete();
+  await getSupabaseAdmin().from("pricing").delete();
 }
 
 export async function syncFromLocalDb(localDbData) {
   if (!localDbData || !isSupabaseConfigured()) return;
 
   const settings = mapDbToSettings(localDbData.settings);
-  await supabaseAdmin.from("settings").upsert({ id: "default", ...settings, updated_at: new Date().toISOString() }, { onConflict: "id" });
+  await getSupabaseAdmin().from("settings").upsert({ id: "default", ...settings, updated_at: new Date().toISOString() }, { onConflict: "id" });
 
   for (const conn of localDbData.providerConnections || []) {
-    await supabaseAdmin.from("provider_connections").upsert(conn, { onConflict: "id" });
+    await getSupabaseAdmin().from("provider_connections").upsert(conn, { onConflict: "id" });
   }
 
   for (const node of localDbData.providerNodes || []) {
-    await supabaseAdmin.from("provider_nodes").upsert(node, { onConflict: "id" });
+    await getSupabaseAdmin().from("provider_nodes").upsert(node, { onConflict: "id" });
   }
 
   for (const pool of localDbData.proxyPools || []) {
-    await supabaseAdmin.from("proxy_pools").upsert(pool, { onConflict: "id" });
+    await getSupabaseAdmin().from("proxy_pools").upsert(pool, { onConflict: "id" });
   }
 
   for (const [alias, model] of Object.entries(localDbData.modelAliases || {})) {
-    await supabaseAdmin.from("model_aliases").upsert({ alias, model }, { onConflict: "alias" });
+    await getSupabaseAdmin().from("model_aliases").upsert({ alias, model }, { onConflict: "alias" });
   }
 
   for (const [tool, mappings] of Object.entries(localDbData.mitmAlias || {})) {
-    await supabaseAdmin.from("mitm_alias").upsert({ tool_name: tool, mappings }, { onConflict: "tool_name" });
+    await getSupabaseAdmin().from("mitm_alias").upsert({ tool_name: tool, mappings }, { onConflict: "tool_name" });
   }
 
   for (const combo of localDbData.combos || []) {
-    await supabaseAdmin.from("combos").upsert(combo, { onConflict: "id" });
+    await getSupabaseAdmin().from("combos").upsert(combo, { onConflict: "id" });
   }
 
   for (const key of localDbData.apiKeys || []) {
-    await supabaseAdmin.from("api_keys").upsert(key, { onConflict: "id" });
+    await getSupabaseAdmin().from("api_keys").upsert(key, { onConflict: "id" });
   }
 
   for (const [provider, models] of Object.entries(localDbData.pricing || {})) {
     for (const [model, pricing] of Object.entries(models)) {
-      await supabaseAdmin
+      await getSupabaseAdmin()
         .from("pricing")
         .upsert({ provider, model, pricing_data: pricing }, { onConflict: "provider,model" });
     }
