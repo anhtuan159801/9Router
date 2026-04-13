@@ -9,6 +9,7 @@ import lockfile from "proper-lockfile";
 const DEFAULT_MITM_ROUTER_BASE = "http://localhost:20128";
 
 const isCloud = typeof caches !== 'undefined' || typeof caches === 'object';
+const isVercel = process.env.VERCEL === '1';
 
 // Get app name - fixed constant to avoid Windows path issues in standalone build
 function getAppName() {
@@ -27,8 +28,11 @@ function getUserDataDir() {
 
   if (platform === "win32") {
     return path.join(process.env.APPDATA || path.join(homeDir, "AppData", "Roaming"), appName);
+  } else if (process.env.APPDATA) {
+    // Linux with APPDATA env (e.g., Docker)
+    return path.join(process.env.APPDATA, appName);
   } else {
-    // macOS & Linux: ~/.{appName}
+    // macOS & Linux: ~/.{appName} or /var/lib for root
     return path.join(homeDir, `.${appName}`);
   }
 }
